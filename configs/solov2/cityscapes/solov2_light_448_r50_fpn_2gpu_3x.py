@@ -17,9 +17,10 @@ model = dict(
         num_outs=5),
     bbox_head=dict(
         type='SOLOv2Head',
-        num_classes=81,
+        # cityscapes have 8 classes
+        num_classes=9,
         in_channels=256,
-        stacked_convs=2,
+        stacked_convs=2, 
         seg_feat_channels=256,
         strides=[8, 8, 16, 32, 32],
         scale_ranges=((1, 56), (28, 112), (56, 224), (112, 448), (224, 896)),
@@ -42,6 +43,7 @@ model = dict(
             out_channels=128,
             start_level=0,
             end_level=3,
+            # hxwxs^2
             num_classes=128,
             norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
     )
@@ -123,7 +125,7 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 # runtime settings

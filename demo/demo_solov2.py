@@ -119,7 +119,7 @@ def main():
     print('model ready.')
     
     if os.path.isdir(data_f):
-        img_files = glob.glob(os.path.join(data_f, '*.jpg'))
+        img_files = glob.glob(os.path.join(data_f, '*.[jp][pn]g'))
         for img_f in img_files:
             tic = time.time()
             result = inference_detector(model, img_f)
