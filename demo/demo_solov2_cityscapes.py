@@ -34,10 +34,9 @@ def show_result_solo_pyplot(model, img, result, score_thr=0.3, fig_size=(15, 10)
 
 
 def vis_seg(img, result, score_thr, save_dir):
-    # class_names = get_classes('coco')
-    class_names = ['date', 'fig', 'hazelnut']
+    class_names = ['__bk__', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+    print(class_names)
     imgs = [img]
-    print(result)
     for img, cur_result in zip(imgs, result):
         h, w, _ = img.shape
         img_show = img[:h, :w, :]
@@ -112,7 +111,7 @@ def main():
     parser.add_argument(
         '--save_dir', default='output/save', help='Device used for save')
     parser.add_argument(
-        '--score-thr', type=float, default=0.21, help='bbox score threshold')
+        '--score-thr', type=float, default=0.3, help='bbox score threshold')
     args = parser.parse_args()
     
     data_f = args.data_f

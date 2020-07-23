@@ -1,6 +1,6 @@
 # model settings
 model = dict(
-    type='SOLOv2',
+    type='SOLO',
     pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
@@ -16,17 +16,18 @@ model = dict(
         start_level=0,
         num_outs=5),
     bbox_head=dict(
-        type='SOLOv2Head',
-        # cityscapes have 8 classes
+        type='DecoupledSOLOHead',
+        # cityscapes have 9 classes
         num_classes=9,
         in_channels=256,
-        stacked_convs=2, 
+        stacked_convs=7,
         seg_feat_channels=256,
         strides=[8, 8, 16, 32, 32],
-        scale_ranges=((1, 56), (28, 112), (56, 224), (112, 448), (224, 896)),
+        scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
         sigma=0.2,
         num_grids=[40, 36, 24, 16, 12],
-        ins_out_channels=128,
+        cate_down_pos=0,
+        with_deform=False,
         loss_ins=dict(
             type='DiceLoss',
             use_sigmoid=True,
@@ -36,17 +37,8 @@ model = dict(
             use_sigmoid=True,
             gamma=2.0,
             alpha=0.25,
-            loss_weight=1.0)),
-    mask_feat_head=dict(
-            type='MaskFeatHead',
-            in_channels=256, 
-            out_channels=128,
-            start_level=0,
-            end_level=3,
-            # hxwxs^2
-            num_classes=128,
-            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
-    )
+            loss_weight=1.0),
+    ))
 # training and testing settings
 train_cfg = dict()
 test_cfg = dict(
@@ -66,8 +58,8 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
     dict(type='Resize',
-         img_scale=[(768, 512), (768, 480), (768, 448),
-                   (768, 416), (768, 384), (768, 352)],
+         img_scale=[(1333, 800), (1333, 768), (1333, 736),
+                    (1333, 704), (1333, 672), (1333, 640)],
          multiscale_mode='value',
          keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.5),
@@ -80,7 +72,7 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(768, 448),
+        img_scale=(1333, 800),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -117,7 +109,7 @@ lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=500,
-    warmup_ratio=0.01,
+    warmup_ratio=1.0 / 3,
     step=[27, 33])
 checkpoint_config = dict(interval=1)
 # yapf:disable
@@ -125,7 +117,7 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
+        # dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 # runtime settings
@@ -133,7 +125,7 @@ total_epochs = 36
 device_ids = range(2)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/cityscapes/solov2_light_release_r50_fpn_2gpu_3x'
+work_dir = './work_dirs/decoupled_solo_release_r50_fpn_2gpu_3x'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

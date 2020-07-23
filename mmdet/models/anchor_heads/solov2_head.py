@@ -342,8 +342,12 @@ class SOLOv2Head(nn.Module):
         return ins_label_list, cate_label_list, ins_ind_label_list, grid_order_list
 
     def get_seg(self, cate_preds, kernel_preds, seg_pred, img_metas, cfg, rescale=None):
+        print('cate_preds: {}'.format(len(cate_preds)))
+        for i in cate_preds:
+            print(i.shape)
         num_levels = len(cate_preds)
         featmap_size = seg_pred.size()[-2:]
+        print('cate_out_channels: ', self.cate_out_channels)
 
         result_list = []
         for img_id in range(len(img_metas)):

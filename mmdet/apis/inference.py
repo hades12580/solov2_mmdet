@@ -74,6 +74,7 @@ def inference_detector(model, img):
         If imgs is a str, a generator will be returned, otherwise return the
         detection results directly.
     """
+    print(model)
     cfg = model.cfg
     device = next(model.parameters()).device  # model device
     # build the data pipeline

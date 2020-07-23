@@ -18,7 +18,7 @@ model = dict(
     bbox_head=dict(
         type='SOLOv2Head',
         # cityscapes have 8 classes
-        num_classes=9,
+        num_classes=4,
         in_channels=256,
         stacked_convs=2, 
         seg_feat_channels=256,
@@ -58,8 +58,8 @@ test_cfg = dict(
     sigma=2.0,
     max_per_img=100)
 # dataset settings
-dataset_type = 'CityscapesDataset'
-data_root = 'data/cityscapes/'
+dataset_type = 'CocoToyDataset'
+data_root = 'data/toy_ins/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -96,18 +96,18 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_train.json',
-        img_prefix=data_root + 'leftImg8bit/train/',
+        ann_file=data_root + 'data/trainval.json',
+        img_prefix=data_root + 'data/images/',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-        img_prefix=data_root + 'leftImg8bit/val/',
+        ann_file=data_root + 'data/trainval.json',
+        img_prefix=data_root + 'data/images/',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_test.json',
-        img_prefix=data_root + 'leftImg8bit/test/',
+        ann_file=data_root + 'data/trainval.json',
+        img_prefix=data_root + 'data/images/',
         pipeline=test_pipeline))
 # optimizer
 optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0001)
@@ -122,18 +122,18 @@ lr_config = dict(
 checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=5,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 36
+total_epochs = 72
 device_ids = range(2)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/cityscapes/solov2_light_release_r50_fpn_2gpu_3x'
+work_dir = './work_dirs/toy/solov2_light_release_r50_fpn_2gpu_3x'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
