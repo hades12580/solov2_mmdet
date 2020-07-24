@@ -34,70 +34,72 @@ def show_result_solo_pyplot(model, img, result, score_thr=0.3, fig_size=(15, 10)
 
 
 def vis_seg(img, result, score_thr, save_dir):
-    class_names = ['__bk__', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+    class_names = ['person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
     print(class_names)
     imgs = [img]
-    for img, cur_result in zip(imgs, result):
-        h, w, _ = img.shape
-        img_show = img[:h, :w, :]
-        
-        seg_label = cur_result[0]
-        seg_label = seg_label.cpu().numpy().astype(np.uint8)
+    if result[0]:
+        for img, cur_result in zip(imgs, result):
+            h, w, _ = img.shape
+            img_show = img[:h, :w, :]
+            
+            seg_label = cur_result[0]
+            seg_label = seg_label.cpu().numpy().astype(np.uint8)
 
-        cate_label = cur_result[1]
-        cate_label = cate_label.cpu().numpy()
+            cate_label = cur_result[1]
+            cate_label = cate_label.cpu().numpy()
 
-        score = cur_result[2].cpu().numpy()
+            score = cur_result[2].cpu().numpy()
 
-        vis_inds = score > score_thr
-        seg_label = seg_label[vis_inds]
-        num_mask = seg_label.shape[0]
-        cate_label = cate_label[vis_inds]
-        cate_score = score[vis_inds]
+            vis_inds = score > score_thr
+            seg_label = seg_label[vis_inds]
+            num_mask = seg_label.shape[0]
+            cate_label = cate_label[vis_inds]
+            cate_score = score[vis_inds]
 
-        mask_density = []
-        for idx in range(num_mask):
-            cur_mask = seg_label[idx, :, :]
-            cur_mask = mmcv.imresize(cur_mask, (w, h))
-            cur_mask = (cur_mask > 0.5).astype(np.int32)
-            mask_density.append(cur_mask.sum())
+            mask_density = []
+            for idx in range(num_mask):
+                cur_mask = seg_label[idx, :, :]
+                cur_mask = mmcv.imresize(cur_mask, (w, h))
+                cur_mask = (cur_mask > 0.5).astype(np.int32)
+                mask_density.append(cur_mask.sum())
 
-        orders = np.argsort(mask_density)
-        seg_label = seg_label[orders]
-        cate_label = cate_label[orders]
-        cate_score = cate_score[orders]
+            orders = np.argsort(mask_density)
+            seg_label = seg_label[orders]
+            cate_label = cate_label[orders]
+            cate_score = cate_score[orders]
 
-        seg_show = img_show.copy()
-        for idx in range(num_mask):
-            idx = -(idx+1)
-            cur_mask = seg_label[idx, :,:]
-            cur_mask = mmcv.imresize(cur_mask, (w, h))
-            cur_mask = (cur_mask > 0.5).astype(np.uint8)
+            seg_show = img_show.copy()
+            for idx in range(num_mask):
+                idx = -(idx+1)
+                cur_mask = seg_label[idx, :,:]
+                cur_mask = mmcv.imresize(cur_mask, (w, h))
+                cur_mask = (cur_mask > 0.5).astype(np.uint8)
 
-            if cur_mask.sum() == 0:
-               continue
+                if cur_mask.sum() == 0:
+                    continue
 
-            color_mask = np.random.randint(
-                0, 256, (1, 3), dtype=np.uint8)
-            cur_mask_bool = cur_mask.astype(np.bool)
-            contours, _ = cv2.findContours(cur_mask*255, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            seg_show[cur_mask_bool] = img_show[cur_mask_bool] * 0.4 + color_mask * 0.6
+                color_mask = np.random.randint(
+                    0, 256, (1, 3), dtype=np.uint8)
+                cur_mask_bool = cur_mask.astype(np.bool)
+                contours, _ = cv2.findContours(cur_mask*255, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                seg_show[cur_mask_bool] = img_show[cur_mask_bool] * 0.4 + color_mask * 0.6
 
-            color_mask = color_mask[0].tolist()
-            cv2.drawContours(seg_show, contours, -1, tuple(color_mask), 1, lineType=cv2.LINE_AA)
+                color_mask = color_mask[0].tolist()
+                cv2.drawContours(seg_show, contours, -1, tuple(color_mask), 1, lineType=cv2.LINE_AA)
 
-            cur_cate = cate_label[idx]
-            cur_score = cate_score[idx]
-            label_text = class_names[cur_cate]
+                cur_cate = cate_label[idx]
+                cur_score = cate_score[idx]
+                label_text = class_names[cur_cate]
 
-            center_y, center_x = ndimage.measurements.center_of_mass(cur_mask)
-            vis_pos = (max(int(center_x) - 10, 0), int(center_y))
-            cv2.putText(seg_show, label_text, vis_pos,
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), lineType=cv2.LINE_AA)
-            cv2.putText(seg_show, '{:.1f}%'.format(cur_score*100), (vis_pos[0], vis_pos[1] + 9),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), lineType=cv2.LINE_AA)
-
+                center_y, center_x = ndimage.measurements.center_of_mass(cur_mask)
+                vis_pos = (max(int(center_x) - 10, 0), int(center_y))
+                cv2.putText(seg_show, label_text, vis_pos,
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), lineType=cv2.LINE_AA)
+                cv2.putText(seg_show, '{:.1f}%'.format(cur_score*100), (vis_pos[0], vis_pos[1] + 9),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), lineType=cv2.LINE_AA)
         mmcv.imshow(seg_show)
+    else:
+        print('no detections')
 
 
 @torch.no_grad()

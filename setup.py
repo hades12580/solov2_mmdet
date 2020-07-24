@@ -296,10 +296,12 @@ if __name__ == '__main__':
                     'src/cuda/deform_pool_cuda_kernel.cu'
                 ]),
             make_cuda_ext(
-                name='sigmoid_focal_loss_ext',
+                name='sigmoid_focal_loss_cuda',
                 module='mmdet.ops.sigmoid_focal_loss',
-                sources=['src/sigmoid_focal_loss_ext.cpp'],
-                sources_cuda=['src/cuda/sigmoid_focal_loss_cuda.cu']),
+                sources=[
+                    'src/sigmoid_focal_loss.cpp',
+                ],
+                sources_cuda=['src/sigmoid_focal_loss_cuda.cu']),
             make_cuda_ext(
                 name='masked_conv2d_ext',
                 module='mmdet.ops.masked_conv',
