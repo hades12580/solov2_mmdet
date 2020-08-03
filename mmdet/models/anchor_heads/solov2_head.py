@@ -125,6 +125,7 @@ class SOLOv2Head(nn.Module):
         new_feats = self.split_feats(feats)
         featmap_sizes = [featmap.size()[-2:] for featmap in new_feats]
         upsampled_size = (featmap_sizes[0][0] * 2, featmap_sizes[0][1] * 2)
+        # what's multi_apply?
         cate_pred, kernel_pred = multi_apply(self.forward_single, new_feats,
                                                        list(range(len(self.seg_num_grids))),
                                                        eval=eval, upsampled_size=upsampled_size)
@@ -342,12 +343,12 @@ class SOLOv2Head(nn.Module):
         return ins_label_list, cate_label_list, ins_ind_label_list, grid_order_list
 
     def get_seg(self, cate_preds, kernel_preds, seg_pred, img_metas, cfg, rescale=None):
-        print('cate_preds: {}'.format(len(cate_preds)))
-        for i in cate_preds:
-            print(i.shape)
+        # print('cate_preds: {}'.format(len(cate_preds)))
+        # for i in cate_preds:
+        #     print(i.shape)
         num_levels = len(cate_preds)
         featmap_size = seg_pred.size()[-2:]
-        print('cate_out_channels: ', self.cate_out_channels)
+        # print('cate_out_channels: ', self.cate_out_channels)
 
         result_list = []
         for img_id in range(len(img_metas)):

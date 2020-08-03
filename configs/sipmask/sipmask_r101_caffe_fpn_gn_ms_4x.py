@@ -1,67 +1,68 @@
 # model settings
 model = dict(
-    type='SOLO',
-    pretrained='torchvision://resnet50',
+    type='SipMask',
+    pretrained='open-mmlab://resnet101_caffe',
     backbone=dict(
         type='ResNet',
-        depth=50,
+        depth=101,
         num_stages=4,
-        out_indices=(0, 1, 2, 3), # C2, C3, C4, C5
+        out_indices=(0, 1, 2, 3),
         frozen_stages=1,
-        style='pytorch'),
+        norm_cfg=dict(type='BN', requires_grad=False),
+        style='caffe'),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
-        start_level=0,
-        num_outs=5),
+        start_level=1,
+        add_extra_convs=True,
+        extra_convs_on_inputs=False,  # use P5
+        num_outs=5,
+        relu_before_extra_convs=True),
     bbox_head=dict(
-        type='DecoupledSOLOHead',
-        # cityscapes have 9 classes
-        num_classes=9,
+        type='SipMaskHead',
+        num_classes=81,
         in_channels=256,
-        stacked_convs=7,
-        seg_feat_channels=256,
-        strides=[8, 8, 16, 32, 32],
-        scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
-        sigma=0.2,
-        num_grids=[80, 72, 64, 48, 32],
-        cate_down_pos=0,
-        with_deform=False,
-        loss_ins=dict(
-            type='DiceLoss',
-            use_sigmoid=True,
-            loss_weight=3.0),
-        loss_cate=dict(
+        stacked_convs=4,
+        feat_channels=256,
+        strides=[8, 16, 32, 64, 128],
+        loss_cls=dict(
             type='FocalLoss',
             use_sigmoid=True,
             gamma=2.0,
             alpha=0.25,
             loss_weight=1.0),
-    ))
+        loss_bbox=dict(type='IoULoss', loss_weight=1.0),
+        loss_centerness=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        center_sampling=True,
+        center_sample_radius=1.5))
 # training and testing settings
-train_cfg = dict()
+train_cfg = dict(
+    assigner=dict(
+        type='MaxIoUAssigner',
+        pos_iou_thr=0.5,
+        neg_iou_thr=0.4,
+        min_pos_iou=0,
+        ignore_iof_thr=-1),
+    allowed_border=-1,
+    pos_weight=-1,
+    debug=False)
 test_cfg = dict(
-    nms_pre=500,
-    score_thr=0.1,
-    mask_thr=0.5,
-    update_thr=0.05,
-    kernel='gaussian',  # gaussian/linear
-    sigma=2.0,
+    nms_pre=1000,
+    min_bbox_size=0,
+    score_thr=0.05,
+    nms=dict(type='nms', iou_thr=0.5),
     max_per_img=100)
 # dataset settings
-dataset_type = 'CityscapesDataset'
-data_root = 'data/cityscapes/'
+dataset_type = 'CocoDataset'
+data_root = 'data/coco/'
 img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+    mean=[102.9801, 115.9465, 122.7717], std=[1.0, 1.0, 1.0], to_rgb=False)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
-    dict(type='Resize',
-         img_scale=[(1333, 800), (1333, 768), (1333, 736),
-                    (1333, 704), (1333, 672), (1333, 640)],
-         multiscale_mode='value',
-         keep_ratio=True),
+    dict(type='Resize', img_scale=[(1333, 800),(1333, 640)], keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
@@ -70,6 +71,8 @@ train_pipeline = [
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+
     dict(
         type='MultiScaleFlipAug',
         img_scale=(1333, 800),
@@ -85,32 +88,38 @@ test_pipeline = [
 ]
 data = dict(
     imgs_per_gpu=2,
-    workers_per_gpu=2,
+    workers_per_gpu=4,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_train.json',
-        img_prefix=data_root + 'leftImg8bit/train/',
+        ann_file=data_root + 'annotations/instances_train2017.json',
+        img_prefix=data_root + 'train2017/',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-        img_prefix=data_root + 'leftImg8bit/val/',
+        ann_file=data_root + 'annotations/instances_val2017.json',
+        img_prefix=data_root + 'val2017/',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-        img_prefix=data_root + 'leftImg8bit/val/',
+        ann_file=data_root + 'annotations/instances_val2017.json',
+        img_prefix=data_root + 'val2017/',
         pipeline=test_pipeline))
+evaluation = dict(interval=1, metric='bbox')
 # optimizer
-optimizer = dict(type='SGD', lr=0.00025, momentum=0.9, weight_decay=0.0001)
-optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+optimizer = dict(
+    type='SGD',
+    lr=0.01,
+    momentum=0.9,
+    weight_decay=0.0001,
+    paramwise_options=dict(bias_lr_mult=2., bias_decay_mult=0.))
+optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
     policy='step',
-    warmup='linear',
+    warmup='constant',
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
-    step=[12, ])
+    step=[40, 46])
 checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
@@ -121,11 +130,10 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 18
-device_ids = range(2)
+total_epochs = 48
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/decoupled_solo_release_r50_fpn_2gpu_3x'
+work_dir = './work_dirs/sipmask_r101_caffe_fpn_gn_ms_4x'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

@@ -16,10 +16,12 @@ from .solov2_head import SOLOv2Head
 from .solov2_light_head import SOLOv2LightHead
 from .decoupled_solo_head import DecoupledSOLOHead
 from .decoupled_solo_light_head import DecoupledSOLOLightHead
+from .sipmask_head import SipMaskHead
 
 __all__ = [
     'AnchorHead', 'GuidedAnchorHead', 'FeatureAdaption', 'RPNHead',
     'GARPNHead', 'RetinaHead', 'RetinaSepBNHead', 'GARetinaHead', 'SSDHead',
     'FCOSHead', 'RepPointsHead', 'FoveaHead', 'FreeAnchorRetinaHead',
-    'ATSSHead', 'SOLOHead', 'SOLOv2Head', 'SOLOv2LightHead', 'DecoupledSOLOHead', 'DecoupledSOLOLightHead'
+    'ATSSHead', 'SOLOHead', 'SOLOv2Head', 'SOLOv2LightHead', 'DecoupledSOLOHead', 'DecoupledSOLOLightHead',
+    'SipMaskHead'
 ]

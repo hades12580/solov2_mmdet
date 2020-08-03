@@ -7,7 +7,7 @@ from pycocotools.cocoeval import COCOeval
 from terminaltables import AsciiTable
 
 from .recall import eval_recalls
-
+from alfred.utils.log import logger as logging
 
 def coco_eval(result_files,
               result_types,
@@ -214,6 +214,7 @@ def segm2json_segm(dataset, results):
                 data['category_id'] = dataset.cat_ids[label]
                 segm['counts'] = segm['counts'].decode()
                 data['segmentation'] = segm
+                data['iscrowd'] = 1
                 segm_json_results.append(data)
     return segm_json_results
 
@@ -242,9 +243,12 @@ def results2json(dataset, results, out_file):
 
 
 def results2json_segm(dataset, results, out_file):
+    logging.info('results2json_segm. ')
     result_files = dict()
+    logging.info('converting dataset and results to json file.')
     json_results = segm2json_segm(dataset, results)
     result_files['segm'] = '{}.{}.json'.format(out_file, 'segm')
+    logging.info('dump to: {}'.format(result_files['segm']))
     mmcv.dump(json_results, result_files['segm'])
 
     return result_files

@@ -24,7 +24,7 @@ model = dict(
         strides=[8, 8, 16, 32, 32],
         scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
         sigma=0.2,
-        num_grids=[40, 36, 24, 16, 12],
+        num_grids=[80, 72, 64, 48, 32],
         ins_out_channels=256,
         loss_ins=dict(
             type='DiceLoss',
@@ -43,6 +43,7 @@ model = dict(
             start_level=0,
             end_level=3,
             num_classes=256,
+            # Replace with syncbn
             norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
     )
 # training and testing settings
@@ -79,6 +80,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(1333, 800),
+        # img_scale=(1980, 1200),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -104,8 +106,8 @@ data = dict(
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_test.json',
-        img_prefix=data_root + 'leftImg8bit/test/',
+        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_train.json',
+        img_prefix=data_root + 'leftImg8bit/train/',
         pipeline=test_pipeline))
 # optimizer
 optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0001)
@@ -127,7 +129,7 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 36
+total_epochs = 38
 device_ids = range(8)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'

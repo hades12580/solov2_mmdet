@@ -1,6 +1,6 @@
 # model settings
 model = dict(
-    type='SOLO',
+    type='SOLOv2',
     pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
@@ -16,18 +16,16 @@ model = dict(
         start_level=0,
         num_outs=5),
     bbox_head=dict(
-        type='DecoupledSOLOHead',
-        # cityscapes have 9 classes
+        type='SOLOv2Head',
         num_classes=9,
         in_channels=256,
-        stacked_convs=7,
-        seg_feat_channels=256,
+        stacked_convs=4,
+        seg_feat_channels=512,
         strides=[8, 8, 16, 32, 32],
         scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
         sigma=0.2,
         num_grids=[80, 72, 64, 48, 32],
-        cate_down_pos=0,
-        with_deform=False,
+        ins_out_channels=256,
         loss_ins=dict(
             type='DiceLoss',
             use_sigmoid=True,
@@ -37,8 +35,17 @@ model = dict(
             use_sigmoid=True,
             gamma=2.0,
             alpha=0.25,
-            loss_weight=1.0),
-    ))
+            loss_weight=1.0)),
+    mask_feat_head=dict(
+            type='MaskFeatHead',
+            in_channels=256,
+            out_channels=128,
+            start_level=0,
+            end_level=3,
+            num_classes=256,
+            # Replace with syncbn
+            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
+    )
 # training and testing settings
 train_cfg = dict()
 test_cfg = dict(
@@ -73,6 +80,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=(1333, 800),
+        # img_scale=(1980, 1200),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -98,19 +106,19 @@ data = dict(
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-        img_prefix=data_root + 'leftImg8bit/val/',
+        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_train.json',
+        img_prefix=data_root + 'leftImg8bit/train/',
         pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='SGD', lr=0.00025, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=500,
-    warmup_ratio=1.0 / 3,
-    step=[12, ])
+    warmup_ratio=0.01,
+    step=[27, 33])
 checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
@@ -121,11 +129,11 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 18
-device_ids = range(2)
+total_epochs = 38
+device_ids = range(8)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/decoupled_solo_release_r50_fpn_2gpu_3x'
+work_dir = './work_dirs/cityscapes/solov2_release_r50_fpn_8gpu_3x'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

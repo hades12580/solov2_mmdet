@@ -310,6 +310,20 @@ if __name__ == '__main__':
                     'src/cuda/masked_conv2d_cuda.cpp',
                     'src/cuda/masked_conv2d_kernel.cu'
                 ]),
+            make_cuda_ext(
+                name='crop_split_cuda',
+                module='mmdet.ops.crop',
+                sources_cuda=['src/crop_split_cuda_kernel.cu'],
+                sources=[
+                    'src/crop_split_cuda.cpp',
+                ]),
+            make_cuda_ext(
+                name='crop_split_gt_cuda',
+                module='mmdet.ops.crop',
+                sources_cuda=['src/crop_split_gt_cuda_kernel.cu'],
+                sources=[
+                    'src/crop_split_gt_cuda.cpp',
+                ]),
         ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)

@@ -308,3 +308,7 @@ SOLOv2(
 )
 ```
 
+Now, it can be train on pytorch 1.6! Finally the final can not train bug is caused by SigmoidLoss bug... But the bug is inside mmdetection or caused by calling, I don't know, I actually don't know which version is actually 'Right'.
+
+
+

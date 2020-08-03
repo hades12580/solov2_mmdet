@@ -18,10 +18,13 @@ from .single_stage_ins import SingleStageInsDetector
 from .two_stage import TwoStageDetector
 from .solo import SOLO
 from .solov2 import SOLOv2
+from .sipmask import SipMask
+
 
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
     'FastRCNN', 'FasterRCNN', 'MaskRCNN', 'CascadeRCNN', 'HybridTaskCascade',
     'DoubleHeadRCNN', 'RetinaNet', 'FCOS', 'GridRCNN', 'MaskScoringRCNN',
-    'RepPointsDetector', 'FOVEA', 'SingleStageInsDetector', 'SOLO', 'SOLOv2'
+    'RepPointsDetector', 'FOVEA', 'SingleStageInsDetector', 'SOLO', 'SOLOv2',
+    'SipMask'
 ]

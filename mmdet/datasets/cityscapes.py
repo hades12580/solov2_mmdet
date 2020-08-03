@@ -68,7 +68,7 @@ class CityscapesDataset(CocoDataset):
                 gt_bboxes_ignore.append(bbox)
             else:
                 gt_bboxes.append(bbox)
-                gt_labels.append(self.cat2label[ann['category_id']])
+                gt_labels.append(self.cat2label[ann['category_id']]+1)
                 gt_masks_ann.append(ann['segmentation'])
 
         if gt_bboxes:

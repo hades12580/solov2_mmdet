@@ -17,6 +17,7 @@ from mmdet.models import build_detector
 import time
 import numpy as np
 import pycocotools.mask as mask_util
+from alfred.utils.log import logger as logging
 
 
 def get_masks(result, num_classes=80):
@@ -56,6 +57,8 @@ def single_gpu_test(model, data_loader, show=False, verbose=True):
         batch_size = data['img'][0].size(0)
         for _ in range(batch_size):
             prog_bar.update()
+        # if i == 100:
+            # break
     return results
 
 
@@ -211,6 +214,7 @@ def main():
         model.CLASSES = checkpoint['meta']['CLASSES']
     else:
         model.CLASSES = dataset.CLASSES
+    logging.info('model.CLASSES: {}'.format(model.CLASSES))
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
@@ -230,9 +234,11 @@ def main():
                 result_file = args.out
                 coco_eval(result_file, eval_types, dataset.coco)
             else:
+                print('what is outputs[o]?', outputs[0])
                 if not isinstance(outputs[0], dict):
                     result_files = results2json_segm(dataset, outputs, args.out)
-                    coco_eval(result_files, eval_types, dataset.coco)
+                    logging.info('eval result file: {}'.format(result_files))
+                    coco_eval(result_files, eval_types, dataset.coco, classwise=True)
                 else:
                     for name in outputs[0]:
                         print('\nEvaluating {}'.format(name))
