@@ -123,3 +123,4 @@ weights/
 data/
 *.pkl
 *.json
+*.onnx

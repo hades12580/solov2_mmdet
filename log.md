@@ -1,5 +1,31 @@
 
 
+- Results:
+
+  ```
+  Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.388
+  Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.666
+  Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.378
+  Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.046
+  Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.346
+  Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.737
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.276
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.428
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.442
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.092
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.447
+  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.781
+  +------------+--------+----------+--------+----------+--------+
+  | category   | AP     | category | AP     | category | AP     |
+  +------------+--------+----------+--------+----------+--------+
+  | person     | 25.679 | rider    | 28.718 | car      | 47.424 |
+  | truck      | 47.697 | bus      | 52.807 | train    | 49.958 |
+  | motorcycle | 33.932 | bicycle  | 23.853 | None     | None   |
+  +------------+--------+----------+--------+----------+--------+
+  ```
+
+  
+
 - Cityscapes is overfited:
 
 ```

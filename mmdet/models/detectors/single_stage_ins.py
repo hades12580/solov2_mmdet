@@ -55,6 +55,14 @@ class SingleStageInsDetector(BaseDetector):
     def forward_dummy(self, img):
         x = self.extract_feat(img)
         outs = self.bbox_head(x)
+        if self.with_mask_feat_head:
+            print('enabling mask_feat_head.')
+            mask_feat_pred = self.mask_feat_head(
+                x[self.mask_feat_head.
+                  start_level:self.mask_feat_head.end_level + 1])
+            # outs = outs + (mask_feat_pred)
+            # print(mask_feat_pred)
+            outs += (mask_feat_pred,)
         return outs
 
     def forward_train(self,

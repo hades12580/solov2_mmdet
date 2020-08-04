@@ -105,8 +105,10 @@ class MaskFeatHead(nn.Module):
             input_p = inputs[i]
             if i == 3:
                 input_feat = input_p
-                x_range = torch.linspace(-1, 1, input_feat.shape[-1], device=input_feat.device)
-                y_range = torch.linspace(-1, 1, input_feat.shape[-2], device=input_feat.device)
+                # x_range = torch.linspace(-1, 1, input_feat.shape[-1], device=input_feat.device)
+                # y_range = torch.linspace(-1, 1, input_feat.shape[-2], device=input_feat.device)
+                x_range = torch.tensor(np.linspace(-1, 1, input_feat.shape[-1]), device=input_feat.device, dtype=torch.float32)
+                y_range = torch.tensor(np.linspace(-1, 1, input_feat.shape[-2]), device=input_feat.device, dtype=torch.float32)
                 y, x = torch.meshgrid(y_range, x_range)
                 y = y.expand([input_feat.shape[0], 1, -1, -1])
                 x = x.expand([input_feat.shape[0], 1, -1, -1])
