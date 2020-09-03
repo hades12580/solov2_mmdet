@@ -147,9 +147,9 @@ class SOLOv2Head(nn.Module):
         # x_range = torch.linspace(-1, 1, ins_kernel_feat.shape[-1], device=ins_kernel_feat.device)
         # y_range = torch.linspace(-1, 1, ins_kernel_feat.shape[-2], device=ins_kernel_feat.device)
         x_range = torch.tensor(np.linspace(-1, 1, ins_kernel_feat.shape[-1]), device=ins_kernel_feat.device, dtype=torch.float32)
-        y_range = torch.tensor(np.linspace(-1, 1, ins_kernel_feat.shape[-1]), device=ins_kernel_feat.device, dtype=torch.float32)
-        logging.info(ins_kernel_feat.shape)
-        logging.info('x_range: {}'.format(x_range))
+        y_range = torch.tensor(np.linspace(-1, 1, ins_kernel_feat.shape[-2]), device=ins_kernel_feat.device, dtype=torch.float32)
+        # logging.info(ins_kernel_feat.shape)
+        # logging.info('x_range: {}'.format(x_range))
 
         y, x = torch.meshgrid(y_range, x_range)
         y = y.expand([ins_kernel_feat.shape[0], 1, -1, -1])

@@ -24,7 +24,8 @@ model = dict(
         strides=[8, 8, 16, 32, 32],
         scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
         sigma=0.2,
-        num_grids=[80, 72, 64, 48, 32],
+        # num_grids=[40, 36, 24, 16, 12],
+        num_grids=[60, 54, 36, 24, 18],
         ins_out_channels=256,
         loss_ins=dict(
             type='DiceLoss',
@@ -44,7 +45,8 @@ model = dict(
             end_level=3,
             num_classes=256,
             # Replace with syncbn
-            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
+            norm_cfg=dict(type='BN', requires_grad=True)),
+            # norm_cfg=dict(type='GN', num_groups=32, requires_grad=True)),
     )
 # training and testing settings
 train_cfg = dict()
@@ -92,7 +94,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    imgs_per_gpu=2,
+    imgs_per_gpu=4,
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
@@ -106,11 +108,11 @@ data = dict(
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-        img_prefix=data_root + 'leftImg8bit/val/',
+        ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_train.json',
+        img_prefix=data_root + 'leftImg8bit/train/',
         pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
 lr_config = dict(
@@ -129,11 +131,11 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 38
-device_ids = range(8)
+total_epochs = 76
+device_ids = range(4)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/cityscapes/solov2_release_r50_fpn_8gpu_3x'
+work_dir = './work_dirs/cityscapes/solov2_release_r50_fpn_bn_4gpu_3x'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

@@ -25,7 +25,8 @@ model = dict(
         strides=[8, 8, 16, 32, 32],
         scale_ranges=((1, 56), (28, 112), (56, 224), (112, 448), (224, 896)),
         sigma=0.2,
-        num_grids=[40, 36, 24, 16, 12],
+        # double some of them, search for a combination of these?
+        num_grids=[60, 40, 24, 16, 12],
         ins_out_channels=128,
         loss_ins=dict(
             type='DiceLoss',
